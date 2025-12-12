@@ -313,8 +313,9 @@ export class GitHubClient implements IGitHubClient {
    * Convert GitHub API comment to our format
    */
   private async convertComment(comment: any, repo: RepositoryConfig): Promise<Comment> {
-    // Get reactions for this comment
-    const reactions = await this.getCommentReactions(comment.id, repo);
+    // Determine comment type and get reactions accordingly
+    const isReviewComment = comment.pull_request_review_id !== undefined || comment.path !== undefined;
+    const reactions = await this.getCommentReactions(comment.id, repo, isReviewComment);
 
     const convertedComment: Comment = {
       id: comment.id,
@@ -351,13 +352,19 @@ export class GitHubClient implements IGitHubClient {
   /**
    * Get reactions for a comment
    */
-  private async getCommentReactions(commentId: number, repo: RepositoryConfig): Promise<Reaction[]> {
+  private async getCommentReactions(commentId: number, repo: RepositoryConfig, isReviewComment: boolean = false): Promise<Reaction[]> {
     try {
       await this.checkRateLimit();
       
-      const response = await this.client.get(`/repos/${repo.owner}/${repo.repo}/issues/comments/${commentId}/reactions`, {
+      // Use different endpoints for review comments vs issue comments
+      const endpoint = isReviewComment 
+        ? `/repos/${repo.owner}/${repo.repo}/pulls/comments/${commentId}/reactions`
+        : `/repos/${repo.owner}/${repo.repo}/issues/comments/${commentId}/reactions`;
+      
+      const response = await this.client.get(endpoint, {
         headers: {
-          'Accept': 'application/vnd.github.squirrel-girl-preview+json'
+          'Accept': 'application/vnd.github+json',
+          'X-GitHub-Api-Version': '2022-11-28'
         }
       });
 

@@ -26,7 +26,7 @@ program
   .option('-r, --repo <repo>', 'Repository in format owner/repo')
   .option('-u, --reviewer <username>', 'Reviewer username to analyze')
   .option('-d, --days <days>', 'Number of days to analyze', '30')
-  .option('-o, --output <file>', 'Output JSON file path', './data/pr-data.json')
+  .option('-o, --output <file>', 'Output JSON file path', './temp/pr-data.json')
   .action(async (options) => {
     try {
       console.log('🚀 GitHub PR Metrics Analyzer');
@@ -137,7 +137,7 @@ program
 program
   .command('analyze')
   .description('Analyze collected PR data from JSON file')
-  .option('-i, --input <file>', 'Input JSON file path', './data/pr-data.json')
+  .option('-i, --input <file>', 'Input JSON file path', './temp/pr-data.json')
   .option('--detailed', 'Show detailed comment analysis')
   .action(async (options) => {
     try {

@@ -204,20 +204,20 @@ export function createDataStorage(): typeof DataStorage {
  * 
  * // Save data
  * await DataStorage.saveCollectedData(
- *   './data/pr-data.json',
+ *   './temp/pr-data.json',
  *   pullRequests,
  *   comments,
  *   { repository: 'owner/repo', reviewer: 'bot', period: { start, end } }
  * );
  * 
  * // Load data
- * const { prs, comments, metadata } = await DataStorage.loadCollectedData('./data/pr-data.json');
+ * const { prs, comments, metadata } = await DataStorage.loadCollectedData('./temp/pr-data.json');
  * 
  * // Validate file
- * const { isValid, errors } = DataStorage.validateDataFile('./data/pr-data.json');
+ * const { isValid, errors } = DataStorage.validateDataFile('./temp/pr-data.json');
  * 
  * // Check if file exists
- * if (DataStorage.fileExists('./data/pr-data.json')) {
+ * if (DataStorage.fileExists('./temp/pr-data.json')) {
  *   // Process file
  * }
  * ```
