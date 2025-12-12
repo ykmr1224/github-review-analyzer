@@ -149,7 +149,7 @@ export class GitHubClient implements IGitHubClient {
 
     // Test authentication
     await this.client.get('/user');
-    console.log(`Authenticated as GitHub App installation: ${installationId}`);
+    
   }
 
   /**
@@ -316,7 +316,7 @@ export class GitHubClient implements IGitHubClient {
     // Get reactions for this comment
     const reactions = await this.getCommentReactions(comment.id, repo);
 
-    return {
+    const convertedComment: Comment = {
       id: comment.id,
       body: comment.body,
       author: this.convertUser(comment.user),
@@ -328,6 +328,13 @@ export class GitHubClient implements IGitHubClient {
       reactions: reactions,
       replies: [] // Will be populated by data processor
     };
+
+    // Add reply relationship data if available (for review comments)
+    if (comment.in_reply_to_id) {
+      convertedComment.inReplyToId = comment.in_reply_to_id;
+    }
+
+    return convertedComment;
   }
 
   /**
@@ -361,7 +368,7 @@ export class GitHubClient implements IGitHubClient {
       }));
     } catch (error) {
       // If reactions endpoint fails, return empty array
-      console.warn(`Failed to get reactions for comment ${commentId}:`, error);
+      
       return [];
     }
   }
@@ -381,7 +388,7 @@ export class GitHubClient implements IGitHubClient {
       'eyes': 'eyes'
     };
     
-    return mapping[content] || 'thumbs_up';
+    return mapping[content] || 'unknown';
   }
 
   /**

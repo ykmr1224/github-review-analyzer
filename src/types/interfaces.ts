@@ -45,10 +45,8 @@ export interface RateLimitInfo {
  * Data collection interface
  */
 export interface IDataCollector {
-  collectPullRequests(config: AnalysisConfig): Promise<PullRequest[]>;
-  collectComments(prs: PullRequest[], reviewerUserName: string): Promise<Comment[]>;
-  collectReactions(comments: Comment[]): Promise<void>;
-  validateData(data: any): boolean;
+  collectPullRequests(config: AnalysisConfig, repoConfig: RepositoryConfig): Promise<PullRequest[]>;
+  collectComments(prs: PullRequest[], reviewerUserName: string, repoConfig: RepositoryConfig): Promise<Comment[]>;
 }
 
 /**

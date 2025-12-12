@@ -9,7 +9,7 @@ export interface User {
 }
 
 export interface Reaction {
-  type: 'thumbs_up' | 'thumbs_down' | 'laugh' | 'hooray' | 'confused' | 'heart' | 'rocket' | 'eyes';
+  type: 'thumbs_up' | 'thumbs_down' | 'laugh' | 'hooray' | 'confused' | 'heart' | 'rocket' | 'eyes' | 'unknown';
   user: User;
   createdAt: Date;
 }
@@ -25,6 +25,8 @@ export interface Comment {
   isResolved: boolean;
   reactions: Reaction[];
   replies: Comment[];
+  // GitHub API reply relationship data
+  inReplyToId?: number; // For review comments that are replies to other review comments
 }
 
 export interface PullRequest {
@@ -75,7 +77,7 @@ export interface DetailedMetrics {
 export interface MetricsReport {
   repository: string;
   period: DateRange;
-  aiReviewer: string;
+  reviewer: string;
   summary: MetricsSummary;
   detailed: DetailedMetrics;
   generatedAt: Date;

@@ -80,7 +80,7 @@ export interface ValidationError {
  */
 export const DEFAULT_CONFIG: Partial<AppConfig> = {
   analysis: {
-    reviewerUserName: 'coderabbitai',
+    reviewerUserName: 'coderabbitai[bot]',
     timePeriod: {
       start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
       end: new Date(), // now
@@ -117,7 +117,7 @@ export class ConfigurationManager implements IConfigurationProvider {
       },
       auth: this.buildAuthConfig(),
       analysis: {
-        reviewerUserName: process.env.REVIEWER_USERNAME || DEFAULT_CONFIG.analysis?.reviewerUserName || 'coderabbitai',
+        reviewerUserName: process.env.REVIEWER_USERNAME || DEFAULT_CONFIG.analysis?.reviewerUserName || 'DEFAULT_REVIEWER_NAME',
         timePeriod: {
           start: process.env.ANALYSIS_START_DATE ? new Date(process.env.ANALYSIS_START_DATE) : DEFAULT_CONFIG.analysis?.timePeriod?.start || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
           end: process.env.ANALYSIS_END_DATE ? new Date(process.env.ANALYSIS_END_DATE) : DEFAULT_CONFIG.analysis?.timePeriod?.end || new Date(),

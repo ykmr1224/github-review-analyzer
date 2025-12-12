@@ -5,8 +5,10 @@
 // Export all public interfaces and types
 export * from './types';
 
-// Main components will be exported as they are implemented in later tasks
-// For now, just export the types and version
+// Export main components (specific exports to avoid conflicts)
+export { ConfigurationManager, DEFAULT_CONFIG } from './config';
+export { GitHubClient } from './github';
+export { DataCollector, createDataCollector } from './collectors';
 
 // Version information
 export const VERSION = '1.0.0';

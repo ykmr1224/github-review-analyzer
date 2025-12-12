@@ -51,8 +51,8 @@
     - Verify credential handling and API client setup
     - _Requirements: 6.1, 6.2_
 
-- [ ] 4. Implement data collection services
-  - [ ] 4.1 Create pull request data collector
+- [x] 4. Implement data collection services
+  - [x] 4.1 Create pull request data collector
     - Implement PR retrieval with time period filtering
     - Add comment collection for specified AI reviewer usernames
     - _Requirements: 1.1, 1.2_
@@ -65,7 +65,7 @@
     - **Property 2: AI reviewer comment filtering**
     - **Validates: Requirements 1.2**
 
-  - [ ] 4.4 Implement comment metadata collection
+  - [x] 4.4 Implement comment metadata collection
     - Collect resolution status, reactions, and reply information
     - Parse comment metadata including timestamps and user data
     - _Requirements: 1.3, 1.4, 5.2_
