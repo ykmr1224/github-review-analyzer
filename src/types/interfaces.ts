@@ -8,38 +8,21 @@ import { PullRequest, Comment, MetricsReport, DateRange, MetricsSummary } from '
  * Configuration management interface
  */
 export interface IConfigurationProvider {
-  getRepositoryConfig(): RepositoryConfig;
-  getAuthConfig(): AuthConfig;
-  getAnalysisConfig(): AnalysisConfig;
-  getOutputConfig(): OutputConfig;
-  validate(): boolean;
+  loadConfig(): Promise<AppConfig>;
+  validateConfig(config: AppConfig): ValidationError[];
+  getConfig(): AppConfig;
+  updateConfig(updates: Partial<AppConfig>): void;
+  saveConfig(): Promise<void>;
 }
 
-export interface RepositoryConfig {
-  owner: string;
-  repo: string;
-  branch?: string;
-}
-
-export interface AuthConfig {
-  token?: string;
-  appId?: string;
-  privateKey?: string;
-  installationId?: string;
-}
-
-export interface AnalysisConfig {
-  aiReviewerUsername: string;
-  timePeriod: DateRange;
-  includePatterns?: string[];
-  excludePatterns?: string[];
-}
-
-export interface OutputConfig {
-  format: 'json' | 'markdown' | 'html' | 'all';
-  outputPath: string;
-  templatePath?: string;
-}
+// Import configuration types from config module
+import { 
+  AppConfig, 
+  RepositoryConfig,
+  AuthConfig,
+  AnalysisConfig,
+  ValidationError 
+} from '../config';
 
 /**
  * GitHub API client interface
@@ -63,7 +46,7 @@ export interface RateLimitInfo {
  */
 export interface IDataCollector {
   collectPullRequests(config: AnalysisConfig): Promise<PullRequest[]>;
-  collectComments(prs: PullRequest[], aiReviewerUsername: string): Promise<Comment[]>;
+  collectComments(prs: PullRequest[], reviewerUserName: string): Promise<Comment[]>;
   collectReactions(comments: Comment[]): Promise<void>;
   validateData(data: any): boolean;
 }
@@ -73,7 +56,7 @@ export interface IDataCollector {
  */
 export interface IDataProcessor {
   filterByTimeRange(prs: PullRequest[], period: DateRange): PullRequest[];
-  filterByAIReviewer(comments: Comment[], username: string): Comment[];
+  filterByReviewer(comments: Comment[], userName: string): Comment[];
   detectResolution(comments: Comment[]): Comment[];
   classifyReactions(comments: Comment[]): Comment[];
   detectReplies(comments: Comment[]): Comment[];
