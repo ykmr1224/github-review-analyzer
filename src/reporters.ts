@@ -102,7 +102,8 @@ export class JSONReportFormatter extends BaseReportFormatter {
             : 0
         }
       },
-      detailed: data.detailed
+      detailed: data.detailed,
+      pullRequests: data.detailed.prDetails || []
     };
 
     return JSON.stringify(jsonReport, null, 2);
@@ -123,6 +124,11 @@ export class MarkdownReportFormatter extends BaseReportFormatter {
   }
 
   private renderTemplate(template: string, data: MetricsReport): string {
+    // Generate PR details table
+    const prDetailsTable = data.detailed.prDetails.map(pr => 
+      `| [#${pr.number}](${pr.url}) | ${pr.title} | ${pr.aiComments} | ${pr.resolvedAiComments} | ${pr.positiveReactions} | ${pr.negativeReactions} | ${pr.totalComments} | `
+    ).join('\n');
+
     // Replace template variables with actual values
     return template
       .replace(/\{\{report\.repository\}\}/g, data.repository)
@@ -148,7 +154,8 @@ export class MarkdownReportFormatter extends BaseReportFormatter {
       .replace(/\{\{report\.detailed\.prBreakdown\.byState\.merged\}\}/g, String(data.detailed.prBreakdown.byState.merged || 0))
       .replace(/\{\{report\.detailed\.prBreakdown\.byState\.closed\}\}/g, String(data.detailed.prBreakdown.byState.closed || 0))
       .replace(/\{\{report\.detailed\.commentBreakdown\.byResolution\.resolved\}\}/g, String(data.detailed.commentBreakdown.byResolution.resolved))
-      .replace(/\{\{report\.detailed\.commentBreakdown\.byResolution\.unresolved\}\}/g, String(data.detailed.commentBreakdown.byResolution.unresolved));
+      .replace(/\{\{report\.detailed\.commentBreakdown\.byResolution\.unresolved\}\}/g, String(data.detailed.commentBreakdown.byResolution.unresolved))
+      .replace(/\{\{prDetailsTable\}\}/g, prDetailsTable);
   }
 
   private getMarkdownTemplate(): string {
@@ -181,6 +188,12 @@ export class MarkdownReportFormatter extends BaseReportFormatter {
 ### Response Rate
 - **Comments with Replies**: {{report.summary.repliedComments}} ({{formatters.percentage report.summary.repliedComments report.summary.totalComments}}%)
 - **Resolution Rate**: {{report.summary.resolvedComments}} ({{formatters.percentage report.summary.resolvedComments report.summary.totalComments}}%)
+
+## Pull Request Details
+
+| PR | Title | AI Comments | (Resolved) | (Positive Reaction) | (Negative Reaction) | Overall Comments | 
+|----|-------|----------------|-------------|---------------------|-------------------|-------------------|
+{{prDetailsTable}}
 
 ## Detailed Breakdown
 

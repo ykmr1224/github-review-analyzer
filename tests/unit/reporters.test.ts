@@ -43,7 +43,29 @@ describe('ReportGenerator', () => {
       reactionBreakdown: {
         byType: { thumbs_up: 15, thumbs_down: 3 },
         positiveVsNegative: { positive: 15, negative: 3 }
-      }
+      },
+      prDetails: [
+        {
+          number: 1,
+          title: 'Test PR 1',
+          url: 'https://github.com/owner/repo/pull/1',
+          totalComments: 3,
+          aiComments: 3,
+          resolvedAiComments: 2,
+          positiveReactions: 2,
+          negativeReactions: 0
+        },
+        {
+          number: 2,
+          title: 'Test PR 2',
+          url: 'https://github.com/owner/repo/pull/2',
+          totalComments: 2,
+          aiComments: 2,
+          resolvedAiComments: 1,
+          positiveReactions: 1,
+          negativeReactions: 1
+        }
+      ]
     };
 
     sampleReport = createMetricsReport(
@@ -77,6 +99,25 @@ describe('ReportGenerator', () => {
       expect(parsed.summary.engagement.replyRate).toBe(32.0);
       expect(parsed.summary.engagement.resolutionRate).toBe(80.0);
     });
+
+    it('should include PR details in JSON output', () => {
+      const output = reportGenerator.generateJSON(sampleReport);
+      const parsed = JSON.parse(output);
+      
+      expect(parsed.pullRequests).toBeDefined();
+      expect(Array.isArray(parsed.pullRequests)).toBe(true);
+      expect(parsed.pullRequests.length).toBe(2);
+      
+      const firstPR = parsed.pullRequests[0];
+      expect(firstPR.number).toBe(1);
+      expect(firstPR.title).toBe('Test PR 1');
+      expect(firstPR.url).toBe('https://github.com/owner/repo/pull/1');
+      expect(firstPR.totalComments).toBe(3);
+      expect(firstPR.aiComments).toBe(3);
+      expect(firstPR.resolvedAiComments).toBe(2);
+      expect(firstPR.positiveReactions).toBe(2);
+      expect(firstPR.negativeReactions).toBe(0);
+    });
   });
 
   describe('Markdown generation', () => {
@@ -88,6 +129,15 @@ describe('ReportGenerator', () => {
       expect(output).toContain('## Summary Metrics');
       expect(output).toContain('owner/repo');
       expect(output).toContain('coderabbit[bot]');
+    });
+
+    it('should include PR details table in markdown output', async () => {
+      const output = await reportGenerator.generateMarkdown(sampleReport);
+      
+      expect(output).toContain('## Pull Request Details');
+      expect(output).toContain('| PR | Title | Total Comments | AI Comments | Resolved AI Comments | Positive Reactions | Negative Reactions |');
+      expect(output).toContain('| [#1](https://github.com/owner/repo/pull/1) | Test PR 1 | 3 | 3 | 2 | 2 | 0 |');
+      expect(output).toContain('| [#2](https://github.com/owner/repo/pull/2) | Test PR 2 | 2 | 2 | 1 | 1 | 1 |');
     });
   });
 
@@ -174,7 +224,19 @@ describe('BaseReportFormatter subclasses', () => {
         reactionBreakdown: {
           byType: { thumbs_up: 8, thumbs_down: 1 },
           positiveVsNegative: { positive: 8, negative: 1 }
-        }
+        },
+        prDetails: [
+          {
+            number: 1,
+            title: 'Test PR 1',
+            url: 'https://github.com/test/repo/pull/1',
+            totalComments: 2,
+            aiComments: 2,
+            resolvedAiComments: 2,
+            positiveReactions: 1,
+            negativeReactions: 0
+          }
+        ]
       };
 
       sampleReport = createMetricsReport(
@@ -232,7 +294,19 @@ describe('BaseReportFormatter subclasses', () => {
         reactionBreakdown: {
           byType: { thumbs_up: 8, thumbs_down: 1 },
           positiveVsNegative: { positive: 8, negative: 1 }
-        }
+        },
+        prDetails: [
+          {
+            number: 1,
+            title: 'Test PR 1',
+            url: 'https://github.com/test/repo/pull/1',
+            totalComments: 2,
+            aiComments: 2,
+            resolvedAiComments: 2,
+            positiveReactions: 1,
+            negativeReactions: 0
+          }
+        ]
       };
 
       sampleReport = createMetricsReport(

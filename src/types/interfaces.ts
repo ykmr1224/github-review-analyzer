@@ -65,7 +65,7 @@ export interface IDataProcessor {
  */
 export interface IMetricsCalculator {
   calculateSummary(prs: PullRequest[], comments: Comment[]): MetricsSummary;
-  calculateDetailed(prs: PullRequest[], comments: Comment[]): any;
+  calculateDetailed(prs: PullRequest[], comments: Comment[], repository?: string): any;
   calculateAverages(data: number[]): number;
   calculatePercentages(numerator: number, denominator: number): number;
   handleEdgeCases(value: number): number;

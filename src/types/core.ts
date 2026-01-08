@@ -56,6 +56,17 @@ export interface MetricsSummary {
   resolvedComments: number;
 }
 
+export interface PRDetails {
+  number: number;
+  title: string;
+  url: string;
+  totalComments: number;
+  aiComments: number;
+  resolvedAiComments: number;
+  positiveReactions: number;
+  negativeReactions: number;
+}
+
 export interface DetailedMetrics {
   prBreakdown: {
     byState: Record<string, number>;
@@ -72,6 +83,7 @@ export interface DetailedMetrics {
       negative: number;
     };
   };
+  prDetails: PRDetails[];
 }
 
 export interface MetricsReport {

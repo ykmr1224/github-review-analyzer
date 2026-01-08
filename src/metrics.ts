@@ -4,7 +4,7 @@
  */
 
 import { IMetricsCalculator } from './types/interfaces';
-import { PullRequest, Comment, MetricsSummary, DetailedMetrics, Reaction } from './types/core';
+import { PullRequest, Comment, MetricsSummary, DetailedMetrics, Reaction, PRDetails } from './types/core';
 
 /**
  * Comment classification types
@@ -153,7 +153,7 @@ export class MetricsCalculator implements IMetricsCalculator {
   /**
    * Calculate detailed metrics breakdown
    */
-  calculateDetailed(prs: PullRequest[], comments: Comment[]): DetailedMetrics {
+  calculateDetailed(prs: PullRequest[], comments: Comment[], repository?: string): DetailedMetrics {
     return {
       prBreakdown: {
         byState: this.calculatePRsByState(prs),
@@ -166,7 +166,8 @@ export class MetricsCalculator implements IMetricsCalculator {
       reactionBreakdown: {
         byType: this.calculateReactionsByType(comments),
         positiveVsNegative: this.calculatePositiveVsNegativeReactions(comments)
-      }
+      },
+      prDetails: this.calculatePRDetails(prs, repository || 'owner/repo')
     };
   }
 
@@ -424,6 +425,49 @@ export class MetricsCalculator implements IMetricsCalculator {
       positive: positiveReactions,
       negative: negativeReactions
     };
+  }
+
+  private calculatePRDetails(prs: PullRequest[], repository: string): PRDetails[] {
+    return prs.map(pr => {
+      // Get comments for this specific PR
+      const prComments = pr.comments || [];
+      
+      // Count AI comments (assuming AI comments are those by the reviewer)
+      const aiComments = prComments.length;
+      
+      // Count resolved AI comments
+      const resolvedAiComments = prComments.filter(comment => comment.isResolved).length;
+      
+      // Count positive and negative reactions on AI comments
+      let positiveReactions = 0;
+      let negativeReactions = 0;
+      
+      for (const comment of prComments) {
+        if (comment.reactions) {
+          for (const reaction of comment.reactions) {
+            if (this.isPositiveReaction(reaction.type)) {
+              positiveReactions++;
+            } else if (this.isNegativeReaction(reaction.type)) {
+              negativeReactions++;
+            }
+          }
+        }
+      }
+      
+      // Generate GitHub URL for the PR
+      const url = `https://github.com/${repository}/pull/${pr.number}`;
+      
+      return {
+        number: pr.number,
+        title: pr.title,
+        url: url,
+        totalComments: prComments.length,
+        aiComments: aiComments,
+        resolvedAiComments: resolvedAiComments,
+        positiveReactions: positiveReactions,
+        negativeReactions: negativeReactions
+      };
+    });
   }
 }
 

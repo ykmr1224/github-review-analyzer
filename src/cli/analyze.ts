@@ -51,7 +51,7 @@ export const analyzeCommand = new Command('analyze')
 
       const calculator = createMetricsCalculator();
       const summary = calculator.calculateSummary(prs, processedComments);
-      const detailed = calculator.calculateDetailed(prs, processedComments);
+      const detailed = calculator.calculateDetailed(prs, processedComments, metadata.repository);
 
       // Validate report format
       const format = options.report.toLowerCase();
@@ -94,7 +94,7 @@ export const analyzeCommand = new Command('analyze')
       console.log(`✅ Report saved to: ${outputPath}`);
 
     } catch (error) {
-      console.error('❌ Error:', error instanceof Error ? error.message : String(error));
+      
       process.exit(1);
     }
   });
