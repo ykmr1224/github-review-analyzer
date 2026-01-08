@@ -95,7 +95,7 @@ export const DEFAULT_CONFIG: Partial<AppConfig> = {
   analysis: {
     reviewerUserName: 'coderabbitai[bot]',
     timePeriod: {
-      start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
+      start: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
       end: new Date(), // now
     },
   },

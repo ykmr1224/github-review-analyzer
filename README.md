@@ -31,13 +31,13 @@ npm run build
 ### 4. Run Analysis
 ```bash
 # Step 1: Collect data from GitHub
-npm start collect --repo owner/repo --reviewer coderabbitai --days 30
+npm start collect --repo owner/repo --reviewer coderabbitai --days 7
 
 # Step 2: Analyze the collected data
 npm start analyze --input ./temp/pr-data.json --detailed
 
 # Or use development mode
-npm run dev collect --repo owner/repo --reviewer coderabbitai --days 30
+npm run dev collect --repo owner/repo --reviewer coderabbitai --days 7
 npm run dev analyze --input ./temp/pr-data.json
 
 # Show current configuration
@@ -56,7 +56,7 @@ github-pr-metrics collect [options]
 Options:
   -r, --repo <repo>      Repository in format owner/repo
   -u, --reviewer <user>  Reviewer username to analyze
-  -d, --days <days>      Number of days to analyze (default: "30")
+  -d, --days <days>      Number of days to analyze (default: "7")
   -o, --output <file>    Output JSON file path (default: "./temp/pr-data.json")
   -h, --help            Display help for command
 ```
@@ -80,7 +80,7 @@ github-pr-metrics config
 
 ### Examples
 ```bash
-# Collect data for last 30 days from your configured repo
+# Collect data for last 7 days from your configured repo
 npm run dev collect
 
 # Collect from specific repository for last 7 days
@@ -129,7 +129,7 @@ npm test
 ### Development Mode
 ```bash
 # Collect data in development mode
-npm run dev collect --repo your-org/your-repo --reviewer coderabbitai --days 30
+npm run dev collect --repo your-org/your-repo --reviewer coderabbitai --days 7
 
 # Analyze collected data
 npm run dev analyze --input ./temp/pr-data.json --detailed

@@ -25,7 +25,7 @@ program
   .description('Collect PR data from GitHub and save to JSON file')
   .option('-r, --repo <repo>', 'Repository in format owner/repo')
   .option('-u, --reviewer <username>', 'Reviewer username to analyze')
-  .option('-d, --days <days>', 'Number of days to analyze', '30')
+  .option('-d, --days <days>', 'Number of days to analyze', '7')
   .option('-o, --output <file>', 'Output JSON file path', './temp/pr-data.json')
   .action(async (options) => {
     try {
@@ -285,7 +285,7 @@ program
       console.log(`Repository: ${config.repository.owner}/${config.repository.repo}`);
       console.log(`Reviewer: ${config.analysis.reviewerUserName}`);
       console.log(`Auth Type: ${config.auth.type}`);
-      console.log(`Time Period: ${config.analysis.timePeriod.start.toISOString().split('T')[0]} to ${config.analysis.timePeriod.end.toISOString().split('T')[0]}`);
+      
       
       
     } catch (error) {
