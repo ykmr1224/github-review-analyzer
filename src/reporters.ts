@@ -124,38 +124,61 @@ export class MarkdownReportFormatter extends BaseReportFormatter {
   }
 
   private renderTemplate(template: string, data: MetricsReport): string {
-    // Generate PR details table
-    const prDetailsTable = data.detailed.prDetails.map(pr => 
-      `| [#${pr.number}](${pr.url}) | ${pr.title} | ${pr.aiComments} | ${pr.resolvedAiComments} | ${pr.positiveReactions} | ${pr.negativeReactions} | ${pr.totalComments} | `
-    ).join('\n');
+    const context = {
+      report: data,
+      formatters: this.formatters,
+      prDetailsTable: this.generatePRDetailsTable(data.detailed.prDetails)
+    };
 
-    // Replace template variables with actual values
-    return template
-      .replace(/\{\{report\.repository\}\}/g, data.repository)
-      .replace(/\{\{report\.reviewer\}\}/g, data.reviewer)
-      .replace(/\{\{formatters\.date report\.period\.start\}\}/g, this.formatters.date(data.period.start))
-      .replace(/\{\{formatters\.date report\.period\.end\}\}/g, this.formatters.date(data.period.end))
-      .replace(/\{\{formatters\.date report\.generatedAt\}\}/g, this.formatters.date(data.generatedAt))
-      .replace(/\{\{report\.summary\.totalPRs\}\}/g, String(data.summary.totalPRs))
-      .replace(/\{\{report\.summary\.totalComments\}\}/g, String(data.summary.totalComments))
-      .replace(/\{\{formatters\.number report\.summary\.averageCommentsPerPR\}\}/g, this.formatters.number(data.summary.averageCommentsPerPR))
-      .replace(/\{\{report\.summary\.positiveReactions\}\}/g, String(data.summary.positiveReactions))
-      .replace(/\{\{report\.summary\.negativeReactions\}\}/g, String(data.summary.negativeReactions))
-      .replace(/\{\{report\.summary\.repliedComments\}\}/g, String(data.summary.repliedComments))
-      .replace(/\{\{report\.summary\.resolvedComments\}\}/g, String(data.summary.resolvedComments))
-      .replace(/\{\{formatters\.percentage report\.summary\.positiveReactions report\.summary\.totalComments\}\}/g, 
-        this.formatters.percentage(data.summary.positiveReactions, data.summary.totalComments))
-      .replace(/\{\{formatters\.percentage report\.summary\.negativeReactions report\.summary\.totalComments\}\}/g, 
-        this.formatters.percentage(data.summary.negativeReactions, data.summary.totalComments))
-      .replace(/\{\{formatters\.percentage report\.summary\.repliedComments report\.summary\.totalComments\}\}/g, 
-        this.formatters.percentage(data.summary.repliedComments, data.summary.totalComments))
-      .replace(/\{\{formatters\.percentage report\.summary\.resolvedComments report\.summary\.totalComments\}\}/g, 
-        this.formatters.percentage(data.summary.resolvedComments, data.summary.totalComments))
-      .replace(/\{\{report\.detailed\.prBreakdown\.byState\.merged\}\}/g, String(data.detailed.prBreakdown.byState.merged || 0))
-      .replace(/\{\{report\.detailed\.prBreakdown\.byState\.closed\}\}/g, String(data.detailed.prBreakdown.byState.closed || 0))
-      .replace(/\{\{report\.detailed\.commentBreakdown\.byResolution\.resolved\}\}/g, String(data.detailed.commentBreakdown.byResolution.resolved))
-      .replace(/\{\{report\.detailed\.commentBreakdown\.byResolution\.unresolved\}\}/g, String(data.detailed.commentBreakdown.byResolution.unresolved))
-      .replace(/\{\{prDetailsTable\}\}/g, prDetailsTable);
+    return this.processTemplate(template, context);
+  }
+
+  private generatePRDetailsTable(prDetails: any[]): string {
+    return prDetails.map(pr => 
+      `| [#${pr.number}](${pr.url}) | ${pr.title} | ${pr.totalComments} | ${pr.aiComments} | ${pr.resolvedAiComments} | ${pr.positiveReactions} | ${pr.negativeReactions} |`
+    ).join('\n');
+  }
+
+  private processTemplate(template: string, context: any): string {
+    // Match template expressions: {{expression}}
+    return template.replace(/\{\{([^}]+)\}\}/g, (match, expression) => {
+      try {
+        return this.evaluateExpression(expression.trim(), context);
+      } catch (error) {
+        // Return original expression if evaluation fails to maintain template integrity
+        return match;
+      }
+    });
+  }
+
+  private evaluateExpression(expression: string, context: any): string {
+    // Handle formatter function calls: formatters.date report.period.start
+    if (expression.startsWith('formatters.')) {
+      return this.evaluateFormatterCall(expression, context);
+    }
+
+    // Handle simple property access: report.repository
+    return String(this.getNestedProperty(expression, context) ?? '');
+  }
+
+  private evaluateFormatterCall(expression: string, context: any): string {
+    const parts = expression.split(' ');
+    const formatterPath = parts[0]; // e.g., "formatters.date"
+    const args = parts.slice(1); // e.g., ["report.period.start"]
+
+    const formatter = this.getNestedProperty(formatterPath, context);
+    if (typeof formatter !== 'function') {
+      throw new Error(`Formatter not found: ${formatterPath}`);
+    }
+
+    const resolvedArgs = args.map(arg => this.getNestedProperty(arg, context));
+    return String(formatter(...resolvedArgs));
+  }
+
+  private getNestedProperty(path: string, obj: any): any {
+    return path.split('.').reduce((current, key) => {
+      return current?.[key];
+    }, obj);
   }
 
   private getMarkdownTemplate(): string {
@@ -191,8 +214,8 @@ export class MarkdownReportFormatter extends BaseReportFormatter {
 
 ## Pull Request Details
 
-| PR | Title | AI Comments | (Resolved) | (Positive Reaction) | (Negative Reaction) | Overall Comments | 
-|----|-------|----------------|-------------|---------------------|-------------------|-------------------|
+| PR | Title | Total Comments | AI Comments | Resolved AI Comments | Positive Reactions | Negative Reactions | 
+|----|-------|----------------|-------------|----------------------|--------------------|-------------------|
 {{prDetailsTable}}
 
 ## Detailed Breakdown
