@@ -1,0 +1,120 @@
+name: 'PR Metrics Analysis'
+
+on:
+  schedule:
+    # Run weekly on Sundays at 00:00 UTC
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
+    inputs:
+      start-date:
+        description: 'Analysis start date (YYYY-MM-DD)'
+        required: true
+        type: string
+      end-date:
+        description: 'Analysis end date (YYYY-MM-DD)'
+        required: true
+        type: string
+      reviewer-username:
+        description: 'AI reviewer username'
+        required: true
+        default: 'coderabbitai'
+        type: string
+
+jobs:
+  analyze-pr-metrics:
+    runs-on: ubuntu-latest
+    name: 'Analyze PR Feedback Metrics'
+    
+    steps:
+      - name: 'Checkout repository'
+        uses: actions/checkout@v4
+      
+      - name: 'Calculate date range for scheduled runs'
+        id: dates
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            # For scheduled runs, analyze the last 7 days
+            END_DATE=$(date -u +%Y-%m-%d)
+            START_DATE=$(date -u -d '7 days ago' +%Y-%m-%d)
+          else
+            # For manual runs, use provided inputs
+            START_DATE="${{ github.event.inputs.start-date }}"
+            END_DATE="${{ github.event.inputs.end-date }}"
+          fi
+          
+          echo "start-date=$START_DATE" >> $GITHUB_OUTPUT
+          echo "end-date=$END_DATE" >> $GITHUB_OUTPUT
+          echo "reviewer=${{ github.event.inputs.reviewer-username || 'coderabbitai' }}" >> $GITHUB_OUTPUT
+      
+      - name: 'Run PR Metrics Analysis'
+        id: metrics
+        uses: ./
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          reviewer-username: ${{ steps.dates.outputs.reviewer }}
+          start-date: ${{ steps.dates.outputs.start-date }}
+          end-date: ${{ steps.dates.outputs.end-date }}
+          report-format: 'both'
+          output-path: './reports'
+          include-detailed: 'true'
+      
+      - name: 'Upload reports as artifacts'
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-metrics-reports-${{ steps.dates.outputs.start-date }}-to-${{ steps.dates.outputs.end-date }}
+          path: ./reports/
+          retention-days: 30
+      
+      - name: 'Comment on PR (if triggered by PR)'
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            // Read the markdown report
+            const reportPath = '${{ steps.metrics.outputs.report-markdown-path }}';
+            if (fs.existsSync(reportPath)) {
+              const report = fs.readFileSync(reportPath, 'utf8');
+              
+              // Create a comment with the report
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `## 📊 PR Metrics Analysis Results
+            
+            **Analysis Period:** ${{ steps.dates.outputs.start-date }} to ${{ steps.dates.outputs.end-date }}
+            **AI Reviewer:** ${{ steps.dates.outputs.reviewer }}
+            
+            ### Summary
+            - **Total PRs:** ${{ steps.metrics.outputs.total-prs }}
+            - **Total Comments:** ${{ steps.metrics.outputs.total-comments }}
+            - **Average Comments per PR:** ${{ steps.metrics.outputs.average-comments-per-pr }}
+            
+            <details>
+            <summary>📄 Full Report</summary>
+            
+            ${report}
+            
+            </details>`
+              });
+            }
+      
+      - name: 'Display results summary'
+        run: |
+          echo "## 📊 Analysis Results" >> $GITHUB_STEP_SUMMARY
+          echo "- **Period:** ${{ steps.dates.outputs.start-date }} to ${{ steps.dates.outputs.end-date }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Reviewer:** ${{ steps.dates.outputs.reviewer }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Total PRs:** ${{ steps.metrics.outputs.total-prs }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Total Comments:** ${{ steps.metrics.outputs.total-comments }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Average Comments per PR:** ${{ steps.metrics.outputs.average-comments-per-pr }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📁 **Reports generated:**" >> $GITHUB_STEP_SUMMARY
+          if [ -n "${{ steps.metrics.outputs.report-json-path }}" ]; then
+            echo "- JSON: \`${{ steps.metrics.outputs.report-json-path }}\`" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ -n "${{ steps.metrics.outputs.report-markdown-path }}" ]; then
+            echo "- Markdown: \`${{ steps.metrics.outputs.report-markdown-path }}\`" >> $GITHUB_STEP_SUMMARY
+          fi

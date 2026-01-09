@@ -9,6 +9,9 @@ dist/
 build/
 *.tsbuildinfo
 
+# Keep bundled GitHub Action
+!dist-action/index.js
+
 # Coverage reports
 coverage/
 *.lcov

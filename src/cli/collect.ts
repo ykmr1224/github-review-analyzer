@@ -13,6 +13,8 @@ export const collectCommand = new Command('collect')
   .option('-r, --repo <repo>', 'Repository in format owner/repo')
   .option('-u, --reviewer <username>', 'Reviewer username to analyze')
   .option('-d, --days <days>', 'Number of days to analyze', '7')
+  .option('-s, --start <date>', 'Start date in YYYY-MM-DD format')
+  .option('-e, --end <date>', 'End date in YYYY-MM-DD format')
   .option('-o, --output <file>', 'Output JSON file path', './temp/pr-data.json')
   .action(async (options) => {
     try {
@@ -37,7 +39,23 @@ export const collectCommand = new Command('collect')
         config.analysis.reviewerUserName = options.reviewer;
       }
 
-      if (options.days) {
+      // Handle date range options
+      if (options.start && options.end) {
+        const startDate = new Date(options.start);
+        const endDate = new Date(options.end);
+        
+        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+          console.error('❌ Invalid date format. Use YYYY-MM-DD');
+          process.exit(1);
+        }
+        
+        if (startDate >= endDate) {
+          console.error('❌ Start date must be before end date');
+          process.exit(1);
+        }
+        
+        config.analysis.timePeriod = { start: startDate, end: endDate };
+      } else if (options.days) {
         const days = parseInt(options.days);
         if (isNaN(days) || days <= 0) {
           console.error('❌ Days must be a positive number');
@@ -49,7 +67,7 @@ export const collectCommand = new Command('collect')
         config.analysis.timePeriod = { start: startDate, end: endDate };
       }
 
-      console.log(`📊 ${config.repository.owner}/${config.repository.repo} | ${config.analysis.reviewerUserName} | ${options.days} days`);
+      console.log(`📊 ${config.repository.owner}/${config.repository.repo} | ${config.analysis.reviewerUserName} | ${config.analysis.timePeriod.start.toISOString().split('T')[0]} to ${config.analysis.timePeriod.end.toISOString().split('T')[0]}`);
 
       // Initialize GitHub client
       const githubClient = new GitHubClient();

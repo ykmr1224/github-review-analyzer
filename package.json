@@ -8,6 +8,7 @@
   },
   "scripts": {
     "build": "tsc",
+    "build:action": "npm run build && ncc build dist/action.js -o dist-action --minify --no-source-map-register",
     "start": "node dist/cli/index.js",
     "dev": "ts-node src/cli/index.ts",
     "test": "jest",
@@ -35,6 +36,7 @@
     "@types/node": "^20.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
+    "@vercel/ncc": "^0.38.4",
     "eslint": "^8.0.0",
     "eslint-config-standard": "^17.1.0",
     "fast-check": "^3.15.0",
@@ -44,6 +46,8 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@actions/core": "^2.0.2",
+    "@actions/github": "^7.0.0",
     "@types/jsonwebtoken": "^9.0.10",
     "axios": "^1.6.0",
     "commander": "^11.0.0",

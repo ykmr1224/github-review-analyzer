@@ -31,18 +31,15 @@ npm run build
 ### 4. Complete Workflow
 ```bash
 # Step 1: Collect data from GitHub
-npm start collect --repo owner/repo --reviewer coderabbit[bot] --days 7
+github-pr-metrics collect --repo owner/repo --reviewer coderabbit[bot] --days 7
 
 # Step 2: Analyze and generate report
-npm start analyze --input ./temp/pr-data.json --report markdown
-
-# Or generate standalone reports
-npm start report --input ./temp/pr-data.json --format json
+github-pr-metrics analyze --input ./temp/pr-data.json --report markdown
 ```
 
 ## CLI Usage
 
-The tool provides three main commands for a complete analysis workflow:
+The tool provides two main commands for a complete analysis workflow:
 
 ### Collect Command
 Collects PR data from GitHub and saves to JSON file:
@@ -53,18 +50,19 @@ Options:
   -r, --repo <repo>      Repository in format owner/repo
   -u, --reviewer <user>  Reviewer username to analyze
   -d, --days <days>      Number of days to analyze (default: "7")
+  -s, --start <date>     Start date in YYYY-MM-DD format
+  -e, --end <date>       End date in YYYY-MM-DD format
   -o, --output <file>    Output JSON file path (default: "./temp/pr-data.json")
   -h, --help            Display help for command
 ```
 
 ### Analyze Command
-Analyzes collected PR data with integrated report generation:
+Analyzes collected PR data and generates reports:
 ```bash
 github-pr-metrics analyze [options]
 
 Options:
   -i, --input <file>         Input JSON file path (default: "./temp/pr-data.json")
-  --detailed                 Show detailed comment analysis
   --report <format>          Generate report in specified format (json, markdown)
   --report-output <file>     Output file for generated report
   -h, --help                Display help for command
@@ -81,19 +79,13 @@ github-pr-metrics config
 #### Basic Workflow
 ```bash
 # Collect data for last 7 days from your configured repo
-npm run dev collect
-
-# Collect from specific repository for last 30 days
-npm run dev collect --repo microsoft/vscode --reviewer coderabbit[bot] --days 30
-
-# Analyze with detailed console output
-npm run dev analyze --detailed
+npm run dev collect --repo your-org/your-repo --reviewer coderabbit[bot] --days 7
 
 # Analyze and generate Markdown report
-npm run dev analyze --report markdown
+npm run dev analyze --input ./temp/pr-data.json --report markdown
 
 # Analyze and generate JSON report with custom output
-npm run dev analyze --report json --report-output ./reports/metrics.json
+npm run dev analyze --input ./temp/pr-data.json --report json --report-output ./reports/metrics.json
 ```
 
 #### Complete Workflow Example
@@ -101,9 +93,17 @@ npm run dev analyze --report json --report-output ./reports/metrics.json
 # 1. Collect data from repository
 npm run dev collect --repo microsoft/vscode --reviewer coderabbit[bot] --days 14
 
-# 2. Analyze with detailed output and generate both report formats
-npm run dev analyze --input ./temp/pr-data.json --detailed --report markdown
+# 2. Generate reports
+npm run dev analyze --input ./temp/pr-data.json --report markdown
 npm run dev analyze --input ./temp/pr-data.json --report json --report-output ./reports/metrics.json
+```
+
+#### CI/CD Usage
+For automated environments, chain the commands:
+```bash
+# Complete workflow in CI
+github-pr-metrics collect --repo owner/repo --reviewer coderabbitai --start 2024-01-01 --end 2024-01-31
+github-pr-metrics analyze --input ./temp/pr-data.json --report markdown
 ```
 
 ## What It Does
@@ -152,27 +152,57 @@ The analysis provides:
 
 ## Development
 
-### Run Tests
+### For CLI Development
 ```bash
-npm test
+npm test                # Run tests
+npm run build          # Compile TypeScript to dist/
+npm run dev            # Run CLI in development mode
 ```
+
+### For GitHub Action Development
+```bash
+npm run build:action   # Create bundled action at dist-action/index.js
+```
+
+The GitHub Action uses a single bundled file (`dist-action/index.js`) that contains all dependencies. This file should be committed to the repository.
 
 ### Development Mode Examples
 ```bash
 # Collect data in development mode
 npm run dev collect --repo your-org/your-repo --reviewer coderabbit[bot] --days 7
 
-# Analyze with detailed output and generate report
-npm run dev analyze --input ./temp/pr-data.json --detailed --report markdown
+# Analyze and generate report
+npm run dev analyze --input ./temp/pr-data.json --report markdown
 
 # Generate JSON report with custom output
 npm run dev analyze --input ./temp/pr-data.json --report json --report-output ./reports/metrics.json
 ```
 
-### Build
-```bash
-npm run build
+## GitHub Actions Integration
+
+Use as a GitHub Action for automated PR metrics analysis:
+
+```yaml
+- name: 'Analyze PR Metrics'
+  uses: your-org/github-pr-metrics@v1
+  with:
+    github-token: ${{ secrets.GITHUB_TOKEN }}
+    reviewer-username: 'coderabbitai'
+    start-date: '2024-01-01'
+    end-date: '2024-01-31'
+    report-format: 'both'
 ```
+
+**Note:** Replace `your-org/github-pr-metrics@v1` with the actual published action reference.
+
+**Benefits of JavaScript Action Architecture:**
+- ⚡ Ultra-fast setup (~5-10 seconds)
+- 📦 Pre-bundled dependencies (no runtime installation)
+- 🔍 Native GitHub Actions core utilities
+- 💾 Minimal resource overhead
+- 🔄 Automatic dependency management
+
+See [GITHUB_ACTIONS.md](./GITHUB_ACTIONS.md) for complete documentation.
 
 ## Features
 
@@ -200,15 +230,15 @@ npm run build
    github-pr-metrics collect --repo owner/repo --reviewer coderabbit[bot] --days 30
    ```
 
-2. **Analyze data and generate report** (JSON by default):
+2. **Analyze data and generate report**:
    ```bash
-   github-pr-metrics analyze --input ./temp/pr-data.json
+   github-pr-metrics analyze --input ./temp/pr-data.json --report markdown
    ```
 
 3. **Generate different report formats**:
    ```bash
-   # Markdown report
-   github-pr-metrics analyze --input ./temp/pr-data.json --report markdown
+   # JSON report
+   github-pr-metrics analyze --input ./temp/pr-data.json --report json
    
    # Custom output location
    github-pr-metrics analyze --input ./temp/pr-data.json --report json --report-output ./reports/metrics.json
@@ -218,8 +248,8 @@ npm run build
 
 ```bash
 # Using npm scripts for development
-npm run start collect --repo owner/repo --reviewer coderabbit[bot] --days 7
-npm run start analyze --input ./temp/pr-data.json --report markdown
+npm run dev collect --repo owner/repo --reviewer coderabbit[bot] --days 7
+npm run dev analyze --input ./temp/pr-data.json --report markdown
 ```
 
 ## Testing
@@ -239,7 +269,12 @@ npm run test:watch
 
 ```
 src/
-├── cli.ts              # Command-line interface with report integration
+├── cli/                # Command-line interface
+│   ├── index.ts        # Main CLI entry point
+│   ├── collect.ts      # Data collection command
+│   └── analyze.ts      # Analysis and reporting command
+├── action.ts           # GitHub Action entry point
+├── workflow.ts         # Shared workflow logic
 ├── config.ts           # Configuration management
 ├── github.ts           # GitHub API client
 ├── collectors.ts       # Data collection services
@@ -257,6 +292,9 @@ tests/
 ├── unit/               # Unit tests
 ├── properties/         # Property-based tests
 └── fixtures/           # Test data fixtures
+
+dist-action/
+└── index.js            # Bundled GitHub Action
 ```
 
 ## Configuration

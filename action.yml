@@ -1,0 +1,69 @@
+name: 'GitHub PR Metrics Analyzer'
+description: 'Analyze GitHub Pull Request feedback effectiveness with comprehensive metrics and reporting'
+author: 'GitHub PR Metrics Team'
+
+branding:
+  icon: 'bar-chart-2'
+  color: 'blue'
+
+inputs:
+  github-token:
+    description: 'GitHub token for API access (use secrets.GITHUB_TOKEN or personal access token)'
+    required: true
+  
+  repository:
+    description: 'Repository to analyze in format "owner/repo" (defaults to current repository)'
+    required: false
+    default: ${{ github.repository }}
+  
+  reviewer-username:
+    description: 'AI reviewer username to analyze (e.g., "coderabbitai")'
+    required: true
+  
+  start-date:
+    description: 'Analysis start date in YYYY-MM-DD format (required if days not provided)'
+    required: false
+  
+  end-date:
+    description: 'Analysis end date in YYYY-MM-DD format (required if days not provided)'
+    required: false
+  
+  days:
+    description: 'Number of days to analyze from today (alternative to start-date/end-date)'
+    required: false
+    default: '7'
+  
+  report-format:
+    description: 'Report output format (json, markdown, or both)'
+    required: false
+    default: 'both'
+  
+  output-path:
+    description: 'Output directory for generated reports'
+    required: false
+    default: './pr-metrics-reports'
+  
+  include-detailed:
+    description: 'Include detailed metrics in reports (true/false)'
+    required: false
+    default: 'true'
+
+outputs:
+  report-json-path:
+    description: 'Path to the generated JSON report'
+  
+  report-markdown-path:
+    description: 'Path to the generated Markdown report'
+  
+  total-prs:
+    description: 'Total number of PRs analyzed'
+  
+  total-comments:
+    description: 'Total number of AI reviewer comments'
+  
+  average-comments-per-pr:
+    description: 'Average comments per PR'
+
+runs:
+  using: 'node20'
+  main: 'dist-action/index.js'
