@@ -25,8 +25,11 @@ Before generating or finalizing code, you (the Agent) must perform a **Self-Corr
     - *Ask yourself:* "Is this function too complex?", "Did I handle the error case?", "Are the types strict?"
 3.  **Refine:** Rewrite the code to address the critique.
 4.  **Final Output:** Present the refined solution.
-    - If you made a significant architectural decision during refinement, explicitly explain *why* in the response.
 
-## 5. Testing & Quality
+## 5. Definition of Done: Documentation
+- **Review Docs:** Upon completing any code change, you must explicitly review `README.md` and other relevant documentation files.
+- **Update Requirement:** If the code change affects setup steps, environment variables, or public APIs, you **must** generate the corresponding updates to the documentation in the same pull request/output.
+
+## 6. Testing & Quality
 - All new features must include a corresponding test file (e.g., `*.test.ts`).
 - Write the test *before* or *alongside* the implementation (TDD mindset).
