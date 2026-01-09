@@ -104,9 +104,9 @@ export class GitHubClient implements IGitHubClient {
     // Set authorization header (never log the token)
     this.client.defaults.headers.common['Authorization'] = `token ${config.token}`;
 
-    // Test authentication by getting user info
-    const response = await this.client.get('/user');
-    console.log(`Authenticated as: ${response.data.login} (token)`);
+    // Test authentication by getting rate limit info (works with GITHUB_TOKEN)
+    await this.client.get('/rate_limit');
+    console.log(`Authenticated successfully (token)`);
   }
 
   /**
@@ -147,8 +147,8 @@ export class GitHubClient implements IGitHubClient {
     // Set authorization header with installation token
     this.client.defaults.headers.common['Authorization'] = `token ${installationToken}`;
 
-    // Test authentication
-    await this.client.get('/user');
+    // Test authentication by getting rate limit info (works with GITHUB_TOKEN)
+    await this.client.get('/rate_limit');
     
   }
 
