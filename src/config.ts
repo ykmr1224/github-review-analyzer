@@ -123,11 +123,23 @@ export class ConfigurationManager implements IConfigurationProvider {
    * Load configuration from environment variables and defaults
    */
   async loadConfig(): Promise<AppConfig> {
+    // Parse repository from GITHUB_REPOSITORY (format: owner/repo) or separate env vars
+    let owner = process.env.GITHUB_REPOSITORY_OWNER || '';
+    let repo = process.env.GITHUB_REPOSITORY_NAME || '';
+    
+    // If separate vars not available, try to parse from GITHUB_REPOSITORY
+    if (!owner || !repo) {
+      const githubRepository = process.env.GITHUB_REPOSITORY;
+      if (githubRepository && githubRepository.includes('/')) {
+        [owner, repo] = githubRepository.split('/');
+      }
+    }
+
     // Start with defaults
     const config: AppConfig = {
       repository: {
-        owner: process.env.GITHUB_REPOSITORY_OWNER || '',
-        repo: process.env.GITHUB_REPOSITORY_NAME || '',
+        owner,
+        repo,
       },
       auth: this.buildAuthConfig(),
       analysis: {

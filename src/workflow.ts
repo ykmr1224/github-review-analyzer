@@ -75,11 +75,18 @@ export async function runCompleteWorkflow(
   // Create output directory
   await fs.mkdir(options.outputDir, { recursive: true });
   
+  // Set environment variables for configuration loading
+  process.env.GITHUB_REPOSITORY = options.repository;
+  process.env.REVIEWER_USERNAME = options.reviewerUsername;
+  if (options.githubToken) {
+    process.env.GITHUB_TOKEN = options.githubToken;
+  }
+  
   // Load configuration
   const configManager = new ConfigurationManager();
   const config = await configManager.loadConfig();
   
-  // Override configuration with options
+  // Override configuration with options (double-check)
   config.repository.owner = owner;
   config.repository.repo = repo;
   config.analysis.reviewerUserName = options.reviewerUsername;
