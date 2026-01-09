@@ -14,6 +14,10 @@ on:
 jobs:
   analyze:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: read
     steps:
       - name: 'Analyze PR Metrics'
         uses: your-org/github-pr-metrics@v1
@@ -22,6 +26,8 @@ jobs:
           reviewer-username: 'coderabbitai[bot]'
           # Analyzes last 7 days by default - perfect for weekly runs!
 ```
+
+**Important:** The `permissions` section is required when using `GITHUB_TOKEN` to access repository data.
 
 ## Inputs
 
@@ -63,6 +69,10 @@ on:
 jobs:
   analyze:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: read
     steps:
       - name: 'Analyze PR Metrics'
         id: metrics
@@ -97,6 +107,10 @@ on:
 jobs:
   analyze:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: read
     steps:
       - name: 'Run Analysis'
         uses: your-org/github-pr-metrics@v1
@@ -106,17 +120,40 @@ jobs:
           days: ${{ github.event.inputs.days }}
 ```
 
-## Security
+## Security & Permissions
 
-Required permissions:
+### Required Permissions
+When using `GITHUB_TOKEN`, your workflow must include these permissions:
+
 ```yaml
 permissions:
-  contents: read
-  pull-requests: read
-  issues: read
+  contents: read        # Read repository contents
+  pull-requests: read   # Access pull request data
+  issues: read         # Access issue comments and reactions
 ```
 
-The action automatically masks tokens and validates inputs.
+### Authentication Options
+The action supports two authentication methods:
+
+1. **GitHub Token (Recommended)**
+   ```yaml
+   with:
+     github-token: ${{ secrets.GITHUB_TOKEN }}
+   ```
+
+2. **Personal Access Token**
+   ```yaml
+   with:
+     github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+   ```
+
+### Troubleshooting Authentication
+
+**403 Forbidden Error:** Ensure your workflow includes the required permissions section.
+
+**Rate Limiting:** The action automatically handles GitHub API rate limits with exponential backoff.
+
+The action automatically masks tokens and validates inputs for security.
 
 ## Development
 

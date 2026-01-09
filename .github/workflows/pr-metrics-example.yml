@@ -29,6 +29,10 @@ jobs:
   analyze-pr-metrics:
     runs-on: ubuntu-latest
     name: 'Analyze PR Feedback Metrics'
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: read
     
     steps:
       - name: 'Checkout repository'

@@ -183,15 +183,25 @@ npm run dev analyze --input ./temp/pr-data.json --report json --report-output ./
 Use as a GitHub Action for automated PR metrics analysis:
 
 ```yaml
-- name: 'Analyze PR Metrics'
-  uses: your-org/github-pr-metrics@v1
-  with:
-    github-token: ${{ secrets.GITHUB_TOKEN }}
-    reviewer-username: 'coderabbitai'
-    start-date: '2024-01-01'
-    end-date: '2024-01-31'
-    report-format: 'both'
+jobs:
+  analyze-pr-metrics:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: read
+    steps:
+      - name: 'Analyze PR Metrics'
+        uses: your-org/github-pr-metrics@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          reviewer-username: 'coderabbitai'
+          start-date: '2024-01-01'
+          end-date: '2024-01-31'
+          report-format: 'both'
 ```
+
+**Important:** The `permissions` section is required for the `GITHUB_TOKEN` to access pull requests and issues data.
 
 **Note:** Replace `your-org/github-pr-metrics@v1` with the actual published action reference.
 
@@ -264,6 +274,46 @@ npm run test:coverage
 # Run in watch mode
 npm run test:watch
 ```
+
+## Troubleshooting
+
+### GitHub Actions Authentication Issues
+
+**Problem:** Workflow fails with "Authentication failed: Request failed with status code 403"
+
+**Solution:** Add required permissions to your workflow:
+```yaml
+jobs:
+  your-job:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: read
+```
+
+**Problem:** Rate limiting errors
+
+**Solution:** The tool automatically handles rate limits, but for large repositories consider:
+- Using a Personal Access Token instead of `GITHUB_TOKEN`
+- Running analysis during off-peak hours
+- Reducing the analysis time period
+
+### CLI Issues
+
+**Problem:** "GitHub token is required" error
+
+**Solution:** Ensure your `.env` file contains a valid `GITHUB_TOKEN`:
+```env
+GITHUB_TOKEN=ghp_your_token_here
+```
+
+**Problem:** No data collected
+
+**Solution:** Verify:
+- Repository name format is correct (`owner/repo`)
+- Reviewer username matches exactly (case-sensitive)
+- Date range contains actual PR activity
 
 ## Project Structure
 
