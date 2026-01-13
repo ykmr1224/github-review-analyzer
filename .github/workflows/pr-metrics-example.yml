@@ -19,11 +19,6 @@ on:
         required: false
         default: '7'
         type: string
-      reviewer-username:
-        description: 'AI reviewer username'
-        required: true
-        default: 'coderabbitai[bot]'
-        type: string
 
 jobs:
   analyze-pr-metrics:
@@ -45,7 +40,7 @@ jobs:
       
       - name: 'Run PR Metrics Analysis'
         id: metrics
-        uses: 'ykmr1224/github-review-analyzer@v1'
+        uses: 'ykmr1224/github-review-analyzer@v0.1'
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}
