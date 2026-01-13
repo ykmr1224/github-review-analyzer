@@ -85,32 +85,21 @@ async function run(): Promise<void> {
     core.setOutput('total-comments', result.summary.totalComments.toString());
     core.setOutput('average-comments-per-pr', result.summary.averageCommentsPerPR.toString());
     
-    // Create job summary
-    const executionTime = (result.executionTime / 1000).toFixed(2);
+    // Show the generated markdown report in the workflow summary
+    const markdownReportPath = result.artifacts.find(artifact => artifact.endsWith('.md'));
     
-    const jobSummary = `
-## 📊 PR Metrics Analysis Results
-
-### Summary
-- **Repository:** ${repository}
-- **AI Reviewer:** ${reviewerUsername}
-- **Analysis Period:** ${startDate} to ${endDate}
-- **Execution Time:** ${executionTime}s
-
-### Metrics
-- **Total PRs:** ${result.summary.totalPRs}
-- **Total Comments:** ${result.summary.totalComments}
-- **Average Comments per PR:** ${result.summary.averageCommentsPerPR.toFixed(2)}
-- **Positive Reactions:** ${result.summary.positiveReactions}
-- **Negative Reactions:** ${result.summary.negativeReactions}
-- **Resolved Comments:** ${result.summary.resolvedComments}
-- **Replied Comments:** ${result.summary.repliedComments}
-
-### Generated Artifacts
-${result.artifacts.map(artifact => `- **${artifact.endsWith('.json') ? 'JSON' : 'MARKDOWN'}:** \`${artifact}\``).join('\n')}
-`;
-    
-    await core.summary.addRaw(jobSummary).write();
+    if (markdownReportPath) {
+      try {
+        const fs = await import('fs/promises');
+        const markdownContent = await fs.readFile(markdownReportPath, 'utf8');
+        await core.summary.addRaw(markdownContent).write();
+        core.info(`📊 Analysis report displayed in workflow summary`);
+      } catch (error) {
+        core.warning(`Failed to read markdown report for summary: ${error}`);
+      }
+    } else {
+      core.warning('No markdown report found to display in summary');
+    }
     
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
