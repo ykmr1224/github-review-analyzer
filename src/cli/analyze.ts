@@ -6,7 +6,8 @@ import { Command } from 'commander';
 import { createMetricsCalculator } from '../metrics';
 import { createDataProcessor } from '../processors';
 import { DataStorage } from '../storage';
-import { createReportGenerator, createMetricsReport, getFileExtension } from '../reporters';
+import { createMetricsReport, getFileExtension } from '../reporters';
+import { generateAndSaveReportToPath } from '../workflow';
 
 export const analyzeCommand = new Command('analyze')
   .description('Analyze collected PR data and generate report')
@@ -60,9 +61,7 @@ export const analyzeCommand = new Command('analyze')
         process.exit(1);
       }
 
-      // Generate report
-      console.log(`📄 Generating ${format.toUpperCase()} report...`);
-      
+      // Generate report using the extracted utility function
       const report = createMetricsReport(
         metadata.repository,
         {
@@ -74,11 +73,6 @@ export const analyzeCommand = new Command('analyze')
         detailed
       );
 
-      const generator = createReportGenerator();
-      const reportContent = await generator.generateReport(report, {
-        format: format as 'json' | 'markdown'
-      });
-
       // Determine output file path
       let outputPath = options.reportOutput;
       if (!outputPath) {
@@ -87,9 +81,14 @@ export const analyzeCommand = new Command('analyze')
         outputPath = `${baseName}-report${extension}`;
       }
 
-      // Write report to file
-      const fs = await import('fs/promises');
-      await fs.writeFile(outputPath, reportContent, 'utf8');
+      // Use the extracted report generation function
+      await generateAndSaveReportToPath(
+        report, 
+        format as 'json' | 'markdown', 
+        outputPath,
+        { info: (message: string) => console.log(message) }
+      );
+
       console.log(`✅ Report saved to: ${outputPath}`);
 
     } catch (error) {

@@ -33,11 +33,6 @@ inputs:
     required: false
     default: '7'
   
-  report-format:
-    description: 'Report output format (json, markdown, or both)'
-    required: false
-    default: 'both'
-  
   output-path:
     description: 'Output directory for generated reports'
     required: false

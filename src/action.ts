@@ -24,7 +24,6 @@ async function run(): Promise<void> {
     const startDateInput = core.getInput('start-date');
     const endDateInput = core.getInput('end-date');
     const daysInput = core.getInput('days');
-    const reportFormat = core.getInput('report-format') || 'both';
     const outputPath = core.getInput('output-path') || './pr-metrics-reports';
     
     // Calculate date range
@@ -59,13 +58,12 @@ async function run(): Promise<void> {
     
     core.info('🚀 Starting GitHub PR Metrics Analysis...');
     
-    // Run the complete workflow
+    // Run the complete workflow - always generate both JSON and markdown reports
     const result = await runCompleteWorkflow({
       repository,
       reviewerUsername,
       startDate,
       endDate,
-      reportFormat: reportFormat as 'json' | 'markdown' | 'both',
       outputDir: outputPath,
       githubToken
     }, {
@@ -88,10 +86,14 @@ async function run(): Promise<void> {
     // Show the generated markdown report in the workflow summary
     const markdownReportPath = result.artifacts.find(artifact => artifact.endsWith('.md'));
     
+    core.info(`📁 Available artifacts: ${result.artifacts.join(', ')}`);
+    
     if (markdownReportPath) {
       try {
         const fs = await import('fs/promises');
+        core.info(`📖 Reading markdown report from: ${markdownReportPath}`);
         const markdownContent = await fs.readFile(markdownReportPath, 'utf8');
+        core.info(`📄 Markdown content length: ${markdownContent.length} characters`);
         await core.summary.addRaw(markdownContent).write();
         core.info(`📊 Analysis report displayed in workflow summary`);
       } catch (error) {
