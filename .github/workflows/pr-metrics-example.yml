@@ -45,70 +45,17 @@ jobs:
       
       - name: 'Run PR Metrics Analysis'
         id: metrics
-        uses: ./
+        uses: 'ykmr1224/github-review-analyzer@v1'
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}
-          reviewer-username: ${{ steps.reviewer.outputs.reviewer }}
-          start-date: ${{ github.event.inputs.start-date }}
-          end-date: ${{ github.event.inputs.end-date }}
-          days: ${{ github.event.inputs.days || '7' }}
+          reviewer-username: 'coderabbitai[bot]'
+          days: '7'
           output-path: './reports'
-      
+
       - name: 'Upload reports as artifacts'
         uses: actions/upload-artifact@v4
         with:
           name: pr-metrics-reports-${{ github.run_id }}
           path: ./reports/
           retention-days: 30
-      
-      - name: 'Comment on PR (if triggered by PR)'
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            
-            // Read the markdown report
-            const reportPath = '${{ steps.metrics.outputs.report-markdown-path }}';
-            if (fs.existsSync(reportPath)) {
-              const report = fs.readFileSync(reportPath, 'utf8');
-              
-              // Create a comment with the report
-              await github.rest.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: `## 📊 PR Metrics Analysis Results
-            
-            **AI Reviewer:** ${{ steps.reviewer.outputs.reviewer }}
-            
-            ### Summary
-            - **Total PRs:** ${{ steps.metrics.outputs.total-prs }}
-            - **Total Comments:** ${{ steps.metrics.outputs.total-comments }}
-            - **Average Comments per PR:** ${{ steps.metrics.outputs.average-comments-per-pr }}
-            
-            <details>
-            <summary>📄 Full Report</summary>
-            
-            ${report}
-            
-            </details>`
-              });
-            }
-      
-      - name: 'Display results summary'
-        run: |
-          echo "## 📊 Analysis Results" >> $GITHUB_STEP_SUMMARY
-          echo "- **Reviewer:** ${{ steps.reviewer.outputs.reviewer }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Total PRs:** ${{ steps.metrics.outputs.total-prs }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Total Comments:** ${{ steps.metrics.outputs.total-comments }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Average Comments per PR:** ${{ steps.metrics.outputs.average-comments-per-pr }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "📁 **Reports generated:**" >> $GITHUB_STEP_SUMMARY
-          if [ -n "${{ steps.metrics.outputs.report-json-path }}" ]; then
-            echo "- JSON: \`${{ steps.metrics.outputs.report-json-path }}\`" >> $GITHUB_STEP_SUMMARY
-          fi
-          if [ -n "${{ steps.metrics.outputs.report-markdown-path }}" ]; then
-            echo "- Markdown: \`${{ steps.metrics.outputs.report-markdown-path }}\`" >> $GITHUB_STEP_SUMMARY
-          fi

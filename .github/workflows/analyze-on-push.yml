@@ -25,10 +25,10 @@ jobs:
           reviewer-username: 'coderabbitai[bot]'
           days: '7'
           output-path: './reports'
-      
-      - name: 'Display summary'
-        run: |
-          echo "## 📊 Quick Metrics Summary" >> $GITHUB_STEP_SUMMARY
-          echo "- **Total PRs (last 7 days):** ${{ steps.metrics.outputs.total-prs }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Total Comments:** ${{ steps.metrics.outputs.total-comments }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Average Comments per PR:** ${{ steps.metrics.outputs.average-comments-per-pr }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: 'Upload reports as artifacts'
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-metrics-reports-${{ github.run_id }}
+          path: ./reports/
+          retention-days: 30
