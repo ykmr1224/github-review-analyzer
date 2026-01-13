@@ -24,7 +24,6 @@ jobs:
           repository: ${{ github.repository }}
           reviewer-username: 'coderabbitai[bot]'
           days: '7'
-          report-format: 'both'
           output-path: './reports'
       
       - name: 'Display summary'

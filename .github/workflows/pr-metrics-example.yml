@@ -53,7 +53,6 @@ jobs:
           start-date: ${{ github.event.inputs.start-date }}
           end-date: ${{ github.event.inputs.end-date }}
           days: ${{ github.event.inputs.days || '7' }}
-          report-format: 'both'
           output-path: './reports'
       
       - name: 'Upload reports as artifacts'

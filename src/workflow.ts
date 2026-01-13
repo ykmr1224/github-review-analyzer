@@ -39,7 +39,7 @@ export interface WorkflowResult {
  * Generate and save a report in the specified format to a custom file path
  * Single responsibility: report generation and file writing
  */
-async function generateAndSaveReportToPath(
+export async function generateAndSaveReportToPath(
   report: MetricsReport,
   format: OutputFormat,
   filePath: string,

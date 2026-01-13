@@ -61,7 +61,6 @@ export const analyzeCommand = new Command('analyze')
         process.exit(1);
       }
 
-      // Generate report using the extracted utility function
       const report = createMetricsReport(
         metadata.repository,
         {

@@ -39,7 +39,6 @@ jobs:
 | `start-date` | ❌ | - | Analysis start date (YYYY-MM-DD) |
 | `end-date` | ❌ | - | Analysis end date (YYYY-MM-DD) |
 | `repository` | ❌ | Current repo | Repository to analyze (owner/repo) |
-| `report-format` | ❌ | `both` | Report format: json, markdown, or both |
 | `output-path` | ❌ | `./pr-metrics-reports` | Output directory for reports |
 
 **Date Options:** By default analyzes last 7 days. Use `days` for different periods or `start-date`/`end-date` for precise control.
