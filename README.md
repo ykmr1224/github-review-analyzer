@@ -198,7 +198,6 @@ jobs:
           reviewer-username: 'coderabbitai'
           start-date: '2024-01-01'
           end-date: '2024-01-31'
-          report-format: 'both'
 ```
 
 **Important:** The `permissions` section is required for the `GITHUB_TOKEN` to access pull requests and issues data.

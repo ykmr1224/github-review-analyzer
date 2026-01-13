@@ -7,7 +7,8 @@ import { GitHubClient } from './github';
 import { createDataCollector } from './collectors';
 import { createDataProcessor } from './processors';
 import { createMetricsCalculator } from './metrics';
-import { createReportGenerator, createMetricsReport } from './reporters';
+import { createReportGenerator, createMetricsReport, OutputFormat } from './reporters';
+import { MetricsReport } from './types/core';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
@@ -16,7 +17,6 @@ export interface WorkflowOptions {
   reviewerUsername: string;
   startDate: string;
   endDate: string;
-  reportFormat: 'json' | 'markdown' | 'both';
   outputDir: string;
   githubToken?: string;
 }
@@ -33,6 +33,26 @@ export interface WorkflowResult {
   };
   artifacts: string[];
   executionTime: number;
+}
+
+/**
+ * Generate and save a report in the specified format to a custom file path
+ * Single responsibility: report generation and file writing
+ */
+export async function generateAndSaveReportToPath(
+  report: MetricsReport,
+  format: OutputFormat,
+  filePath: string,
+  logger: { info: (message: string) => void }
+): Promise<string> {
+  const generator = createReportGenerator();
+  
+  logger.info(`📄 Generating ${format.toUpperCase()} report...`);
+  const content = await generator.generateReport(report, { format });
+  
+  await fs.writeFile(filePath, content, 'utf8');
+  
+  return filePath;
 }
 
 export async function runCompleteWorkflow(
@@ -141,7 +161,7 @@ export async function runCompleteWorkflow(
   const summary = calculator.calculateSummary(prs, processedComments);
   const detailed = calculator.calculateDetailed(prs, processedComments, options.repository);
   
-  // Generate reports
+  // Generate reports using the core utility function
   const report = createMetricsReport(
     options.repository,
     { start, end },
@@ -150,32 +170,14 @@ export async function runCompleteWorkflow(
     detailed
   );
   
-  const generator = createReportGenerator();
   const artifacts: string[] = [];
   
-  // Generate JSON report
-  if (options.reportFormat === 'json' || options.reportFormat === 'both') {
-    logger.info('📄 Generating JSON report...');
-    const jsonContent = await generator.generateReport(report, {
-      format: 'json'
-    });
-    
-    const jsonPath = path.join(options.outputDir, 'pr-metrics-report.json');
-    await fs.writeFile(jsonPath, jsonContent, 'utf8');
-    artifacts.push(jsonPath);
-  }
+  const filename = 'pr-metrics-report'
+  const jsonPath = path.join(options.outputDir, `${filename}.json`);
+  artifacts.push(await generateAndSaveReportToPath(report, 'json', jsonPath, logger));
   
-  // Generate Markdown report
-  if (options.reportFormat === 'markdown' || options.reportFormat === 'both') {
-    logger.info('📄 Generating Markdown report...');
-    const markdownContent = await generator.generateReport(report, {
-      format: 'markdown'
-    });
-    
-    const markdownPath = path.join(options.outputDir, 'pr-metrics-report.md');
-    await fs.writeFile(markdownPath, markdownContent, 'utf8');
-    artifacts.push(markdownPath);
-  }
+  const markdownPath = path.join(options.outputDir, `${filename}.md`);
+  artifacts.push(await generateAndSaveReportToPath(report, 'markdown', markdownPath, logger));
   
   const executionTime = Date.now() - startTime;
   
