@@ -28,7 +28,6 @@ export interface ReportTemplateData {
 export interface ReportConfig {
   format: OutputFormat;
   template?: string;
-  includeDetailed: boolean;
   customFields?: Record<string, any>;
 }
 
@@ -260,7 +259,7 @@ export class ReportGenerator implements IReportGenerator {
     ]);
   }
 
-  async generateReport(data: MetricsReport, config: ReportConfig = { format: 'markdown', includeDetailed: true }): Promise<string> {
+  async generateReport(data: MetricsReport, config: ReportConfig = { format: 'markdown' }): Promise<string> {
     const formatter = this.formatters.get(config.format);
     if (!formatter) {
       throw new Error(`Unsupported format: ${config.format}`);

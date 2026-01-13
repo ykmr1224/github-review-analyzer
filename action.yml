@@ -1,6 +1,6 @@
-name: 'GitHub PR Metrics Analyzer'
-description: 'Analyze GitHub Pull Request feedback effectiveness with comprehensive metrics and reporting'
-author: 'GitHub PR Metrics Team'
+name: 'GitHub Review Analyzer'
+description: 'Analyze GitHub AI reviewer effectiveness with comprehensive metrics and reporting'
+author: 'ykmr1224'
 
 branding:
   icon: 'bar-chart-2'
@@ -17,7 +17,7 @@ inputs:
     default: ${{ github.repository }}
   
   reviewer-username:
-    description: 'AI reviewer username to analyze (e.g., "coderabbitai")'
+    description: 'AI reviewer username to analyze (e.g., "coderabbitai[bot]")'
     required: true
   
   start-date:
@@ -42,11 +42,6 @@ inputs:
     description: 'Output directory for generated reports'
     required: false
     default: './pr-metrics-reports'
-  
-  include-detailed:
-    description: 'Include detailed metrics in reports (true/false)'
-    required: false
-    default: 'true'
 
 outputs:
   report-json-path:

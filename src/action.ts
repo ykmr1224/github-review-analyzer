@@ -26,7 +26,6 @@ async function run(): Promise<void> {
     const daysInput = core.getInput('days');
     const reportFormat = core.getInput('report-format') || 'both';
     const outputPath = core.getInput('output-path') || './pr-metrics-reports';
-    const includeDetailed = core.getBooleanInput('include-detailed');
     
     // Calculate date range
     let startDate: string;
@@ -68,7 +67,6 @@ async function run(): Promise<void> {
       endDate,
       reportFormat: reportFormat as 'json' | 'markdown' | 'both',
       outputDir: outputPath,
-      includeDetailed,
       githubToken
     }, {
       info: core.info,

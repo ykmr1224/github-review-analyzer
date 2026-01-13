@@ -18,7 +18,6 @@ export interface WorkflowOptions {
   endDate: string;
   reportFormat: 'json' | 'markdown' | 'both';
   outputDir: string;
-  includeDetailed: boolean;
   githubToken?: string;
 }
 
@@ -158,8 +157,7 @@ export async function runCompleteWorkflow(
   if (options.reportFormat === 'json' || options.reportFormat === 'both') {
     logger.info('📄 Generating JSON report...');
     const jsonContent = await generator.generateReport(report, {
-      format: 'json',
-      includeDetailed: options.includeDetailed
+      format: 'json'
     });
     
     const jsonPath = path.join(options.outputDir, 'pr-metrics-report.json');
@@ -171,8 +169,7 @@ export async function runCompleteWorkflow(
   if (options.reportFormat === 'markdown' || options.reportFormat === 'both') {
     logger.info('📄 Generating Markdown report...');
     const markdownContent = await generator.generateReport(report, {
-      format: 'markdown',
-      includeDetailed: options.includeDetailed
+      format: 'markdown'
     });
     
     const markdownPath = path.join(options.outputDir, 'pr-metrics-report.md');
