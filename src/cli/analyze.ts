@@ -76,8 +76,7 @@ export const analyzeCommand = new Command('analyze')
 
       const generator = createReportGenerator();
       const reportContent = await generator.generateReport(report, {
-        format: format as 'json' | 'markdown',
-        includeDetailed: true
+        format: format as 'json' | 'markdown'
       });
 
       // Determine output file path

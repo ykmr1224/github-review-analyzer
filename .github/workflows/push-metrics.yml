@@ -26,7 +26,6 @@ jobs:
           days: '7'
           report-format: 'both'
           output-path: './reports'
-          include-detailed: 'false'
       
       - name: 'Display summary'
         run: |

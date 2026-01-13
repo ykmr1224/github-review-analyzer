@@ -150,10 +150,10 @@ describe('ReportGenerator', () => {
     });
 
     it('should generate reports using generateReport method', async () => {
-      const jsonOutput = await reportGenerator.generateReport(sampleReport, { format: 'json', includeDetailed: true });
+      const jsonOutput = await reportGenerator.generateReport(sampleReport, { format: 'json' });
       expect(() => JSON.parse(jsonOutput)).not.toThrow();
 
-      const markdownOutput = await reportGenerator.generateReport(sampleReport, { format: 'markdown', includeDetailed: true });
+      const markdownOutput = await reportGenerator.generateReport(sampleReport, { format: 'markdown' });
       expect(markdownOutput).toContain('# GitHub PR Metrics Report');
     });
   });
